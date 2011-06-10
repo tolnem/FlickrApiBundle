@@ -1,0 +1,76 @@
+<?php
+
+namespace Ideato\FlickrApiBundle\Model;
+
+use Ideato\FlickrApiBundle\Model\PhotoGallery;
+
+class PhotoGalleryRepository
+{
+    protected $flickr_api;
+    protected $photo_respositoy;
+
+    public function __construct(\Ideato\FlickrApiBundle\Wrapper\FlickrApi $flickr_api,
+                                \Ideato\FlickrApiBundle\Model\PhotoRepository $photo_respositoy)
+    {
+        $this->flickr_api = $flickr_api;
+        $this->photo_respositoy = $photo_respositoy;
+    }
+
+    /**
+     * Given a SimpleXMLElement, hydrate the data fo a Photogallery
+     *
+     * @param \SimpleXMLElement $album
+     * @return PhotoGallery
+     */
+    protected function buildPhotogalleryFromXml(\SimpleXMLElement $album)
+    {
+        $photogallery = new PhotoGallery();
+        $photogallery->setId((string)$album->id);
+        $photogallery->setTitle((string)$album->title);
+        $photogallery->setDescription((string)$album->description);
+        $photogallery->setPreview((string)$album->preview);
+
+        return $photogallery;
+    }
+
+    /**
+     * Using the Flickr API class retrieves the photo sets and return an array of PhotoGallery objects
+     *
+     * @return array
+     */
+    public function getPhotoGalleriesPreview()
+    {
+        $photogalleries = array();
+        $albums_xml = $this->flickr_api->getPhotoSets();
+
+        foreach ($albums_xml as $album)
+        {
+            $photogalleries[] = $this->buildPhotogalleryFromXml($album);
+        }
+
+        return $photogalleries;
+    }
+
+    /**
+     * Using the Flickr API class retrieves the photo set and its images,
+     * and return a PhotoGallery with its Photo objects associated
+     *
+     * @param string $photogallery_id
+     * @return PhotoGallery
+     */
+    public function getPhotoGallery($photogallery_id, $image_size = 'sq')
+    {
+        $album_xml = $this->flickr_api->getPhotoSet($photogallery_id);
+
+        if ($album_xml)
+        {
+            $photogallery = $this->buildPhotogalleryFromXml($album_xml);
+            $photogallery->setId($photogallery_id);
+            $photogallery->setPhotos($this->photo_respositoy->getPhotosFromXml($album_xml->photos, $image_size));
+
+            return $photogallery;
+        }
+    }
+
+
+}

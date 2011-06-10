@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="flickr_api.url">http://api.flickr.com/services/rest/?</parameter>
+        <parameter key="flickr_api.user_id">your_id</parameter>
+        <parameter key="flickr_api.api_key">your_api_key</parameter>
+        <parameter key="flickr_api.class">Ideato\FlickrApiBundle\Wrapper\FlickrApi</parameter>
+        <parameter key="flickr_api.curl_wrapper">Ideato\FlickrApiBundle\Wrapper\Curl</parameter>
+        <parameter key="flickr_api.photogallery_repository_class">Ideato\FlickrApiBundle\Model\PhotoGalleryRepository</parameter>
+        <parameter key="flickr_api.photo_repository_class">Ideato\FlickrApiBundle\Model\PhotoRepository</parameter>
+    </parameters>
+
+    <services>
+        <service id="flickr_api.curl" class="%flickr_api.curl_wrapper%"></service>
+
+        <service id="flickr_api.api" class="%flickr_api.class%">
+            <argument type="service" id="flickr_api.curl" />
+            <argument>%flickr_api.url%</argument>
+            <argument>%flickr_api.user_id%</argument>
+            <argument>%flickr_api.api_key%</argument>
+        </service>
+
+        <service id="flickr_api.photo_repository" class="%flickr_api.photo_repository_class%"></service>
+
+        <service id="flickr_api.photogallery_repository" class="%flickr_api.photogallery_repository_class%">
+            <argument type="service" id="flickr_api.api" />
+            <argument type="service" id="flickr_api.photo_repository" />
+        </service>
+    </services>
+</container>
