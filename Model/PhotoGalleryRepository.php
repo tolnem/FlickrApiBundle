@@ -82,8 +82,12 @@ class PhotoGalleryRepository
     public function getLatestPhotos($limit = 9)
     {
         $photos_xml = $this->flickr_api->getRecentPhotos($limit);
-        $photos = $this->photo_repository->getPhotosFromXml($photos_xml, 'sq', 'sq');
+        if (\is_null($photos_xml))
+        {
+            return;
+        }
 
+        $photos = $this->photo_repository->getPhotosFromXml($photos_xml, 'sq', 'sq');
         foreach ($photos as $photo)
         {
             $contexts = $this->flickr_api->getAllContexts($photo->getId());

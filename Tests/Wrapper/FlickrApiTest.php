@@ -151,7 +151,7 @@ class FlickrApiTest extends \PHPUnit_Framework_TestCase
     public function testGetRecentPhotosButNoPhotos()
     {
         $wrapper = new FlickrApi(new CurlMock(), 'http://ex.com?', 'empty', 'a');
-        $this->assertEquals(array(), $wrapper->getRecentPhotos());
+        $this->assertEquals(null, $wrapper->getRecentPhotos());
     }
 
     public function testGetAllContexts()

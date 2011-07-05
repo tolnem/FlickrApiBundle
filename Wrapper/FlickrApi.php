@@ -207,7 +207,7 @@ class FlickrApi
      * Calls the flickr.photos.search api method with the given limit and return the photo xml data
      *
      * @param int $limit
-     * @return SimpleXmlElement or an empty array it the response is not correct
+     * @return SimpleXmlElement or null it the response is not correct
      */
     public function getRecentPhotos($limit = 9)
     {
@@ -216,7 +216,7 @@ class FlickrApi
 
         if (!$xml || count($xml->photos->photo) <= 0)
         {
-            return array();
+            return null;
         }
 
         return $xml->photos;
