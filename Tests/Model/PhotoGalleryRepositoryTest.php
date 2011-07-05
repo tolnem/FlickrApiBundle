@@ -4,6 +4,9 @@ namespace Ideato\FlickrApiBundle\Tests\Model;
 
 use Ideato\FlickrApiBundle\Model\PhotoGalleryRepository;
 
+/**
+ * @group flickr
+ */
 class PhotoGalleryRepositoryTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()

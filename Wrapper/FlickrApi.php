@@ -59,6 +59,18 @@ class FlickrApi
     }
 
     /**
+     * Url for calling flickr.photos.getAllContexts api method
+     *
+     * @param string $photo_id
+     * @return string
+     */
+    protected function buildAllContextsUrl($photo_id)
+    {
+        return $this->url.'method=flickr.photos.getAllContexts&api_key='.$this->api_key.'&photo_id='.$photo_id;
+    }
+
+
+    /**
      * Checks whether the given xml has the "rsp" element with the "stat" attribute set to "ok"
      *
      * @param \DOMDocument $doc
@@ -191,6 +203,12 @@ class FlickrApi
         return null;
     }
 
+    /**
+     * Calls the flickr.photos.search api method with the given limit and return the photo xml data
+     *
+     * @param int $limit
+     * @return SimpleXmlElement or an empty array it the response is not correct
+     */
     public function getRecentPhotos($limit = 9)
     {
         $results = $this->curl->get($this->buildBaseUrl('flickr.photos.search', '&per_page='.$limit.'&extras=path_alias,url_sq,url_t,url_s,url_m,url_z,url_l,url_o'));
@@ -204,12 +222,15 @@ class FlickrApi
         return $xml->photos;
     }
 
+    /**
+     * Calls the flickr.photos.getAllContexts api methods and return a SimpleXmlElement
+     *
+     * @param int $photo_id
+     * @return SimpleXmlElement or null if the response is not an xml
+     */
     public function getAllContexts($photo_id)
     {
-
-        $url = $this->url.'method=flickr.photos.getAllContexts&api_key='.$this->api_key.'&photo_id='.$photo_id;
-
-        $results = $this->curl->get($url);
+        $results = $this->curl->get($this->buildAllContextsUrl($photo_id));
         $xml = \simplexml_load_string($results);
 
         if ($xml)

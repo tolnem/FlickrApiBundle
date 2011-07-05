@@ -5,6 +5,9 @@ namespace Ideato\FlickrApiBundle\Tests\Wrapper;
 use Ideato\FlickrApiBundle\Test\CurlMock;
 use Ideato\FlickrApiBundle\Wrapper\FlickrApi;
 
+/**
+ * @group flickr
+ */
 class FlickrApiTest extends \PHPUnit_Framework_TestCase
 {
     protected $wrapper;

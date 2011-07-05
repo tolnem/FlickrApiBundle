@@ -6,6 +6,14 @@ use Ideato\FlickrApiBundle\Model\Photo;
 
 class PhotoRepository
 {
+    /**
+     * Builds an array of Ideato\FlickrApiBundle\Model\Photo object based on the SimpleXMLElement given
+     *
+     * @param \SimpleXMLElement $xml
+     * @param string $preview_size
+     * @param string $image_size
+     * @return array of Ideato\FlickrApiBundle\Model\Photo object
+     */
     public function getPhotosFromXml(\SimpleXMLElement $xml, $preview_size = 's', $image_size = 'm')
     {
         $photos = array();

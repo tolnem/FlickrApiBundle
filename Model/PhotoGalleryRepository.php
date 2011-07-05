@@ -72,6 +72,13 @@ class PhotoGalleryRepository
         }
     }
 
+    /**
+     * Retrives the latest photos data and their contexts throught the FlickrApi object,
+     * and then sets the PhotoSetId for each photo.
+     *
+     * @param int $limit
+     * @return array
+     */
     public function getLatestPhotos($limit = 9)
     {
         $photos_xml = $this->flickr_api->getRecentPhotos($limit);

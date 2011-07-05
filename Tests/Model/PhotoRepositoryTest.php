@@ -4,6 +4,9 @@ namespace Ideato\FlickrApiBundle\Tests\Model;
 
 use Ideato\FlickrApiBundle\Model\PhotoRepository;
 
+/**
+ * @group flickr
+ */
 class PhotoRepositoryTest extends \PHPUnit_Framework_TestCase
 {
     public function testGetPhotosFromXml()
