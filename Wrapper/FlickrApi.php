@@ -141,7 +141,7 @@ class FlickrApi
         foreach ($xml->photosets->photoset as $photo_set)
         {
             $attributes = $photo_set->attributes();
-            $photo_set->addChild('preview', $this->getPhotoSetPreview((string)$attributes['id']));
+            $photo_set->addChild('preview', $this->getPhotoSetPreview($attributes));
             $photo_set->addChild('id', $attributes['id']);
         }
 
@@ -151,26 +151,11 @@ class FlickrApi
     /**
      * Calls flickr.photosets.getPhotos througt the Curl wrapper to get the first picture of the set
      *
-     * TO DO: this is the right way to get the set preview image!
-     *
-     *      public function getPhotoSetPreview($attributes, $size = 'm')
-     *      {
-     *          return "http://farm".$attributes['farm'].".static.flickr.com/".$attributes['server']."/".$attributes['primary']."_".$attributes['secret']."_".$size.".jpg";
-     *      }
-     *
-     *
      * @return string the url of the image
      */
-    public function getPhotoSetPreview($photoset_id)
+    public function getPhotoSetPreview($attributes, $size = 'm')
     {
-        $results = $this->curl->get($this->buildPhotoSetPreviewUrl('flickr.photosets.getPhotos', $photoset_id));
-        $xml = \simplexml_load_string($results);
-        if ($xml && count($xml->photoset->photo) > 0)
-        {
-            return $this->buildPhotoUrl($xml->photoset->photo->attributes());
-        }
-
-        return null;
+        return "http://farm".$attributes['farm'].".static.flickr.com/".$attributes['server']."/".$attributes['primary']."_".$attributes['secret']."_".$size.".jpg";
     }
 
     /**

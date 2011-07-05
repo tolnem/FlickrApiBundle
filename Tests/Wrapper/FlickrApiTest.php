@@ -30,7 +30,7 @@ class FlickrApiTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPhotoSetPreview()
     {
-        $photo_url = $this->wrapper->getPhotoSetPreview('72157623940754473');
+        $photo_url = $this->wrapper->getPhotoSetPreview(array('id' => '72157623940754473', 'primary' => '4609025198', 'secret' => '196fbbd66d', 'server' => '1134', 'farm' => '2'));
         
         $this->assertEquals('http://farm2.static.flickr.com/1134/4609025198_196fbbd66d_m.jpg', $photo_url);
     }
@@ -81,8 +81,6 @@ class FlickrApiTest extends \PHPUnit_Framework_TestCase
         $wrapper = new FlickrApi($curl, 'http://www.example.com', '123', '1234');
         $this->assertEquals(array(), $wrapper->getPhotoSets());
 
-        $this->assertEquals(null, $wrapper->getPhotoSetPreview('12345'));
-        
         $this->assertEquals(null, $wrapper->getPhotoSet('12345'));
     }
 
@@ -96,9 +94,6 @@ class FlickrApiTest extends \PHPUnit_Framework_TestCase
         $wrapper = new FlickrApi($curl, 'http://www.example.com', '123', '1234');
 
         $this->assertEquals(array(), $wrapper->getPhotoSets());
-
-        $this->assertEquals(null, $wrapper->getPhotoSetPreview('12345'));
-
 
         $curl = $this->getMock('\Ideato\FlickrApiBundle\Wrapper\Curl', array('get'));
         $curl->expects($this->any())
@@ -135,7 +130,6 @@ class FlickrApiTest extends \PHPUnit_Framework_TestCase
         $wrapper = new FlickrApi($curl, 'http://www.example.com', '123', '1234');
 
         $this->assertEquals(array(), $wrapper->getPhotoSets());
-        $this->assertEquals(null, $wrapper->getPhotoSetPreview('12345'));
         $this->assertEquals(null, $wrapper->getPhotoSet('12345'));
     }
 
