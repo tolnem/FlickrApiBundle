@@ -4,11 +4,35 @@ namespace Ideato\FlickrApiBundle\Model;
 
 class Photo
 {
+    private $id;
+    private $photoset_id;
     private $url;
     private $title;
     private $preview;
     private $image;
     private $description;
+
+
+    public function getPhotoSetId()
+    {
+        return $this->photoset_id;
+    }
+
+    public function setPhotoSetId($photoset_id)
+    {
+        $this->photoset_id = $photoset_id;
+    }
+
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
 
     public function getUrl()
     {

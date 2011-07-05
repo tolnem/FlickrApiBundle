@@ -32,7 +32,7 @@ class FlickrApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('http://farm2.static.flickr.com/1134/4609025198_196fbbd66d_m.jpg', $photo_url);
     }
 
-    public function testgetPhotoSet()
+    public function testGetPhotoSet()
     {
         $photo_set = $this->wrapper->getPhotoSet('72157623940754473');
 
@@ -132,10 +132,45 @@ class FlickrApiTest extends \PHPUnit_Framework_TestCase
         $wrapper = new FlickrApi($curl, 'http://www.example.com', '123', '1234');
 
         $this->assertEquals(array(), $wrapper->getPhotoSets());
-
         $this->assertEquals(null, $wrapper->getPhotoSetPreview('12345'));
-
         $this->assertEquals(null, $wrapper->getPhotoSet('12345'));
     }
 
+
+    public function testGetRecentPhotos()
+    {
+        $expected = \simplexml_load_string(\file_get_contents(__DIR__.'/../../DataFixtures/Files/latest_photos.xml'));
+        $photos_xml = $this->wrapper->getRecentPhotos();
+
+        $this->assertEquals($expected, $photos_xml);
+    }
+
+    public function testGetRecentPhotosButNoPhotos()
+    {
+        $wrapper = new FlickrApi(new CurlMock(), 'http://ex.com?', 'empty', 'a');
+        $this->assertEquals(array(), $wrapper->getRecentPhotos());
+    }
+
+    public function testGetAllContexts()
+    {
+        $expected = \simplexml_load_string(\file_get_contents(__DIR__.'/../../DataFixtures/Files/all_contexts.xml'));
+        $all_contexts = $this->wrapper->getAllContexts('5513307106');
+
+        $this->assertEquals($expected, $all_contexts);
+    }
+
+    public function testGetAllContextsNoAnswer()
+    {
+        $all_contexts = $this->wrapper->getAllContexts('no_photo_id');
+
+        $this->assertEquals(null, $all_contexts);
+    }
+    
+    public function testGetAllContextsNoSets()
+    {
+        $expected = \simplexml_load_string(\file_get_contents(__DIR__.'/../../DataFixtures/Files/all_contexts_no_sets.xml'));
+        $all_contexts = $this->wrapper->getAllContexts('123456');
+
+        $this->assertEquals($expected, $all_contexts);
+    }
 }

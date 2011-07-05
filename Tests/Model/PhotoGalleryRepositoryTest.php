@@ -6,21 +6,24 @@ use Ideato\FlickrApiBundle\Model\PhotoGalleryRepository;
 
 class PhotoGalleryRepositoryTest extends \PHPUnit_Framework_TestCase
 {
+    public function setUp()
+    {
+        $this->flickr_api = $this->getMock('Ideato\FlickrApiBundle\Wrapper\FlickrApi', array('getPhotoSets', 'getPhotoSet', 'getRecentPhotos', 'getAllContexts'), array(), '', false);
+        $this->photo_repository = $this->getMock('\Ideato\FlickrApiBundle\Model\PhotoRepository', array('getPhotosFromXml'));
+
+        $this->photogallery_repository = new PhotoGalleryRepository($this->flickr_api, $this->photo_repository);
+    }
+
+
     public function testGetPhotoGalleriesPreview()
     {
         $xml_mock_sets_results = \simplexml_load_file(__DIR__.'/../../DataFixtures/Files/flickr_api_get_sets_results.xml');
 
-        $flickr_api = $this->getMock('Ideato\FlickrApiBundle\Wrapper\FlickrApi', array('getPhotoSets'), array(), '', false);
-        $flickr_api->expects($this->any())
+        $this->flickr_api->expects($this->any())
                    ->method('getPhotoSets')
                    ->will($this->returnValue($xml_mock_sets_results));
 
-        $photo_repository = $this->getMock('\Ideato\FlickrApiBundle\Model\PhotoRepository');
-
-        $repository = new PhotoGalleryRepository($flickr_api, $photo_repository);
-
-
-        $photogalleries = $repository->getPhotoGalleriesPreview();
+        $photogalleries = $this->photogallery_repository->getPhotoGalleriesPreview();
 
         $this->assertEquals(6, count($photogalleries));
         foreach ($photogalleries as $photogallery)
@@ -39,19 +42,16 @@ class PhotoGalleryRepositoryTest extends \PHPUnit_Framework_TestCase
     {
         $xml_mock_set_result = \simplexml_load_file(__DIR__.'/../../DataFixtures/Files/flickr_api_get_set_result.xml');
 
-        $flickr_api = $this->getMock('Ideato\FlickrApiBundle\Wrapper\FlickrApi', array('getPhotoSet'), array(), '', false);
-        $flickr_api->expects($this->any())
+        $this->flickr_api->expects($this->any())
                    ->method('getPhotoSet')
                    ->with('72157623940754473')
                    ->will($this->returnValue($xml_mock_set_result));
 
-        $photo_repository = $this->getMock('\Ideato\FlickrApiBundle\Model\PhotoRepository', array('getPhotosFromXml'));
-        $photo_repository->expects($this->any())
+        $this->photo_repository->expects($this->any())
                          ->method('getPhotosFromXml')
                          ->will($this->returnValue(array()));
 
-        $repository = new PhotoGalleryRepository($flickr_api, $photo_repository);
-        $photogallery = $repository->getPhotoGallery('72157623940754473');
+        $photogallery = $this->photogallery_repository->getPhotoGallery('72157623940754473');
 
         $this->assertTrue($photogallery instanceof \Ideato\FlickrApiBundle\Model\PhotoGallery);
 
@@ -59,5 +59,45 @@ class PhotoGalleryRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('Flickr cup 1', $photogallery->getTitle());
         $this->assertEquals('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean at orci in nisl commodo malesuada. Ut varius, sem vel tempus elementum, nisl tortor tincidunt diam, et eleifend libero est vel nunc.', $photogallery->getDescription());
         $this->assertEquals(0, count($photogallery->getPhotos()));
+    }
+
+    public function testGetLatestPhotos()
+    {
+        $xml_latest_photos = \simplexml_load_file(__DIR__.'/../../DataFixtures/Files/latest_photos.xml');
+        $xml_all_contexts = \simplexml_load_file(__DIR__.'/../../DataFixtures/Files/all_contexts.xml');
+
+        $photo1 = $this->getMock('Ideato\FlickrApiBundle\Model\Photo', array('setPhotoSetId', 'getId'));
+        $photo1->expects($this->once())
+               ->method('setPhotoSetId')
+               ->with('72157623940754473');
+        $photo1->expects($this->once())
+               ->method('getId')
+               ->will($this->returnValue('1234'));
+
+        $photo2 = $this->getMock('Ideato\FlickrApiBundle\Model\Photo', array('setPhotoSetId', 'getId'));
+        $photo2->expects($this->once())
+               ->method('setPhotoSetId')
+               ->with('72157623940754473');
+        $photo1->expects($this->once())
+               ->method('getId')
+               ->will($this->returnValue('4321'));
+
+        $photos = array($photo1, $photo2);
+
+        $this->photo_repository->expects($this->any())
+                         ->method('getPhotosFromXml')
+                         ->will($this->returnValue($photos));
+
+        $this->flickr_api->expects($this->once())
+                   ->method('getRecentPhotos')
+                   ->will($this->returnValue($xml_latest_photos));
+        
+        $this->flickr_api->expects($this->exactly(2))
+                   ->method('getAllContexts')
+                   ->will($this->onConsecutiveCalls($xml_all_contexts, $xml_all_contexts));
+
+        $photos = $this->photogallery_repository->getLatestPhotos();
+
+        $this->assertEquals(2, count($photos));
     }
 }

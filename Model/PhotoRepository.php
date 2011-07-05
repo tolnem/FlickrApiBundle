@@ -14,6 +14,7 @@ class PhotoRepository
             $attributes = $photo->attributes();
 
             $photo = new Photo();
+            $photo->setId((string)$attributes['id']);
             $photo->setUrl('http://www.flickr.com/'.$attributes['pathalias'].'/'.$attributes['id']);
             $photo->setTitle($attributes['title']);
             $photo->setDescription('');

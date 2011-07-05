@@ -10,6 +10,86 @@ class FlickrApi
     protected $api_key;
 
     /**
+     * Returns the url of a single flickr picture
+     * format: http://farm{farm-id}.static.flickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+     *
+     * @param mixed $attributes
+     * @param string $size
+     * @return string
+     */
+    protected function buildPhotoUrl($attributes, $size = 'm')
+    {
+        return 'http://farm'.$attributes['farm'].'.static.flickr.com/'.$attributes['server'].'/'.$attributes['id'].'_'.$attributes['secret'].'_'.$size.'.jpg';
+    }
+
+    /**
+     * Builds the url for retrieving the data about the first image of a photo set
+     *
+     * @param string $method
+     * @param string $photoset_id
+     * @return string
+     */
+    protected function buildPhotoSetPreviewUrl($method, $photoset_id)
+    {
+        return $this->buildBaseUrl($method, '&photoset_id='.$photoset_id.'&per_page=1&page=1');
+    }
+
+    /**
+     * Builds the url for retrieving the data about all the images of a photo set
+     *
+     * @param string $method
+     * @param string $photoset_id
+     * @param string $extra_parameters
+     * @return string
+     */
+    protected function buildPhotoSetUrl($method, $photoset_id, $extra_parameters = '')
+    {
+        return $this->buildBaseUrl($method, '&photoset_id='.$photoset_id.$extra_parameters);
+    }
+
+    /**
+     * Builds the basic url for any method of the flickr api
+     *
+     * @param string $method
+     * @return string
+     */
+    protected function buildBaseUrl($method, $extra_parameters = '')
+    {
+        return $this->url.'method='.$method.'&api_key='.$this->api_key.'&user_id='.$this->user_id.$extra_parameters;
+    }
+
+    /**
+     * Checks whether the given xml has the "rsp" element with the "stat" attribute set to "ok"
+     *
+     * @param \DOMDocument $doc
+     * @return boolean
+     */
+    protected function isValidResponse(\DOMDocument $doc)
+    {
+        return 'ok' == $doc->getElementsByTagName('rsp')->item(0)->getAttributeNode('stat')->value;
+    }
+
+    /**
+     * Calls the given url and creates and returns a dom document based on the recieved xml
+     *
+     * @param string $url
+     * @return \DOMDocument
+     *
+     * @throw Exception if the respose is not valid or there are errors qith the curl wrapper call
+     */
+    protected function loadDomDocument($url)
+    {
+        $dom = new \DOMDocument();
+        $dom->loadXML($this->curl->get($url));
+        if (!$this->isValidResponse($dom) || $this->curl->hasError())
+        {
+            throw new \Exception('Error callling '.$url);
+        }
+
+        return $dom;
+    }
+
+    /**
      * @see http://www.flickr.com/services/api/
      *
      * @param \Ideato\FlickrApiBundle\Wrapper\Curl $curl
@@ -59,6 +139,14 @@ class FlickrApi
     /**
      * Calls flickr.photosets.getPhotos througt the Curl wrapper to get the first picture of the set
      *
+     * TO DO: this is the right way to get the set preview image!
+     *
+     *      public function getPhotoSetPreview($attributes, $size = 'm')
+     *      {
+     *          return "http://farm".$attributes['farm'].".static.flickr.com/".$attributes['server']."/".$attributes['primary']."_".$attributes['secret']."_".$size.".jpg";
+     *      }
+     *
+     *
      * @return string the url of the image
      */
     public function getPhotoSetPreview($photoset_id)
@@ -71,37 +159,6 @@ class FlickrApi
         }
 
         return null;
-    }
-
-    /**
-     * Checks whether the given xml has the "rsp" element with the "stat" attribute set to "ok"
-     *
-     * @param \DOMDocument $doc
-     * @return boolean
-     */
-    protected function isValidResponse(\DOMDocument $doc)
-    {
-        return 'ok' == $doc->getElementsByTagName('rsp')->item(0)->getAttributeNode('stat')->value;
-    }
-
-    /**
-     * Calls the given url and creates and returns a dom document based on the recieved xml
-     *
-     * @param string $url
-     * @return \DOMDocument
-     *
-     * @throw Exception if the respose is not valid or there are errors qith the curl wrapper call
-     */
-    protected function loadDomDocument($url)
-    {
-        $dom = new \DOMDocument();
-        $dom->loadXML($this->curl->get($url));
-        if (!$this->isValidResponse($dom) || $this->curl->hasError())
-        {
-            throw new \Exception('Error callling '.$url);
-        }
-
-        return $dom;
     }
 
     /**
@@ -134,53 +191,31 @@ class FlickrApi
         return null;
     }
 
-    /**
-     * Returns the url of a single flickr picture
-     * format: http://farm{farm-id}.static.flickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
-     *
-     * @param mixed $attributes
-     * @param string $size
-     * @return string
-     */
-    protected function buildPhotoUrl($attributes, $size = 'm')
+    public function getRecentPhotos()
     {
-        return 'http://farm'.$attributes['farm'].'.static.flickr.com/'.$attributes['server'].'/'.$attributes['id'].'_'.$attributes['secret'].'_'.$size.'.jpg';
+        $results = $this->curl->get($this->buildBaseUrl('flickr.photos.search', '&per_page=9&extras=path_alias,url_sq,url_t,url_s,url_m,url_z,url_l,url_o'));
+        $xml = \simplexml_load_string($results);
+
+        if (!$xml || count($xml->photos->photo) <= 0)
+        {
+            return array();
+        }
+
+        return $xml->photos;
     }
 
-    /**
-     * Builds the url for retrieving the data about the first image of a photo set
-     *
-     * @param string $method
-     * @param string $photoset_id
-     * @return string
-     */
-    protected function buildPhotoSetPreviewUrl($method, $photoset_id)
+    public function getAllContexts($photo_id)
     {
-        return $this->buildBaseUrl($method).'&photoset_id='.$photoset_id.'&per_page=1&page=1';
-    }
 
-    /**
-     * Builds the url for retrieving the data about all the images of a photo set
-     *
-     * @param string $method
-     * @param string $photoset_id
-     * @param string $extra_parameters
-     * @return string
-     */
-    protected function buildPhotoSetUrl($method, $photoset_id, $extra_parameters = '')
-    {
-        return $this->buildBaseUrl($method).'&photoset_id='.$photoset_id.$extra_parameters;
-    }
+        $url = $this->url.'method=flickr.photos.getAllContexts&api_key='.$this->api_key.'&photo_id='.$photo_id;
 
-    /**
-     * Builds the basic url for any method of the flickr api
-     *
-     * @param string $method
-     * @return string
-     */
-    protected function buildBaseUrl($method)
-    {
-        return $this->url.'method='.$method.'&api_key='.$this->api_key.'&user_id='.$this->user_id;
+        $results = $this->curl->get($url);
+        $xml = \simplexml_load_string($results);
+
+        if ($xml)
+        {
+            return $xml;
+        }
     }
 
 }

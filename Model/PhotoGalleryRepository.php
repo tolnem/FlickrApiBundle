@@ -7,13 +7,13 @@ use Ideato\FlickrApiBundle\Model\PhotoGallery;
 class PhotoGalleryRepository
 {
     protected $flickr_api;
-    protected $photo_respositoy;
+    protected $photo_repository;
 
     public function __construct(\Ideato\FlickrApiBundle\Wrapper\FlickrApi $flickr_api,
-                                \Ideato\FlickrApiBundle\Model\PhotoRepository $photo_respositoy)
+                                \Ideato\FlickrApiBundle\Model\PhotoRepository $photo_respository)
     {
         $this->flickr_api = $flickr_api;
-        $this->photo_respositoy = $photo_respositoy;
+        $this->photo_repository = $photo_respository;
     }
 
     /**
@@ -66,11 +66,28 @@ class PhotoGalleryRepository
         {
             $photogallery = $this->buildPhotogalleryFromXml($album_xml);
             $photogallery->setId($photogallery_id);
-            $photogallery->setPhotos($this->photo_respositoy->getPhotosFromXml($album_xml->photos, $image_size));
+            $photogallery->setPhotos($this->photo_repository->getPhotosFromXml($album_xml->photos, $image_size));
 
             return $photogallery;
         }
     }
 
+    public function getLatestPhotos()
+    {
+        $photos_xml = $this->flickr_api->getRecentPhotos();
+        $photos = $this->photo_repository->getPhotosFromXml($photos_xml, 'sq', 'sq');
 
+        foreach ($photos as $photo)
+        {
+            $contexts = $this->flickr_api->getAllContexts($photo->getId());
+
+            if (isset($contexts->set))
+            {
+                $attributes = $contexts->set->attributes();
+                $photo->setPhotoSetId((string)$attributes['id']);
+            }
+        }
+
+        return $photos;
+    }
 }
