@@ -55,3 +55,10 @@ and to diplay it:
 * You can access the flickr api directly througt the service "flickr_api.api":
 
     $container->get('flickr_api.api');
+
+*Update 2011-07-05*
+
+* Get the most recent photos for the given account:
+
+    $photos = $this->get('flickr_api.photogallery_repository')->getLatestPhotos($limit); //$limit default is 9
+

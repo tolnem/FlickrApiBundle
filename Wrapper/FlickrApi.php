@@ -191,9 +191,9 @@ class FlickrApi
         return null;
     }
 
-    public function getRecentPhotos()
+    public function getRecentPhotos($limit = 9)
     {
-        $results = $this->curl->get($this->buildBaseUrl('flickr.photos.search', '&per_page=9&extras=path_alias,url_sq,url_t,url_s,url_m,url_z,url_l,url_o'));
+        $results = $this->curl->get($this->buildBaseUrl('flickr.photos.search', '&per_page='.$limit.'&extras=path_alias,url_sq,url_t,url_s,url_m,url_z,url_l,url_o'));
         $xml = \simplexml_load_string($results);
 
         if (!$xml || count($xml->photos->photo) <= 0)
