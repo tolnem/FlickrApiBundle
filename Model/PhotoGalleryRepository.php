@@ -84,7 +84,7 @@ class PhotoGalleryRepository
         $photos_xml = $this->flickr_api->getRecentPhotos($limit);
         if (\is_null($photos_xml))
         {
-            return;
+            return array();
         }
 
         $photos = $this->photo_repository->getPhotosFromXml($photos_xml, 'sq', 'sq');
