@@ -12,7 +12,7 @@ class PhotoGalleryRepositoryTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->flickr_api = $this->getMock('Ideato\FlickrApiBundle\Wrapper\FlickrApi', array('getPhotoSets', 'getPhotoSet', 'getRecentPhotos', 'getAllContexts'), array(), '', false);
-        $this->photo_repository = $this->getMock('\Ideato\FlickrApiBundle\Model\PhotoRepository', array('getPhotosFromXml'));
+        $this->photo_repository = $this->getMock('Ideato\FlickrApiBundle\Model\PhotoRepository', array('getPhotosFromXml'));
 
         $this->photogallery_repository = new PhotoGalleryRepository($this->flickr_api, $this->photo_repository);
     }

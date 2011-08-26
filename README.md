@@ -62,5 +62,16 @@ and to diplay it:
 * Get the most recent photos for the given account:
 
     
-    $photos = $this->get('flickr_api.photogallery_repository')->getLatestPhotos($limit); //$limit default is 9
+    $photos = $this->get('flickr_api.photogallery_repository')->getLatestPhotos($limit);
     
+
+$limit default is 9
+
+
+**Update 2011-08-26**
+
+* Added a way to run the tests outside a symfony2 project:
+
+
+    phpunit -c .
+
