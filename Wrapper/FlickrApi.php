@@ -169,7 +169,7 @@ class FlickrApi
         try
         {
             $info_set = $this->loadDomDocument($this->buildPhotoSetUrl('flickr.photosets.getInfo', $photoset_id));
-            $photos = $this->loadDomDocument($this->buildPhotoSetUrl('flickr.photosets.getPhotos', $photoset_id, '&extras=path_alias,url_sq,url_t,url_s,url_m,url_o'));
+            $photos = $this->loadDomDocument($this->buildPhotoSetUrl('flickr.photosets.getPhotos', $photoset_id, '&extras=path_alias,url_sq,url_t,url_s,url_l,url_m,url_o'));
 
             $photos_element = $info_set->createElement('photos');
             foreach ($photos->getElementsByTagName('photo') as $photo)
@@ -196,7 +196,8 @@ class FlickrApi
      */
     public function getRecentPhotos($limit = 9)
     {
-        $results = $this->curl->get($this->buildBaseUrl('flickr.photos.search', '&per_page='.$limit.'&extras=path_alias,url_sq,url_t,url_s,url_m,url_z,url_l,url_o'));
+        //var_dump($this->buildBaseUrl('flickr.photos.search', '&per_page='.$limit.'&extras=path_alias,url_sq,url_b,url_t,url_s,url_m,url_z,url_l,url_o'));
+        $results = $this->curl->get($this->buildBaseUrl('flickr.photos.search', '&per_page='.$limit.'&extras=path_alias,url_sq,url_b,url_t,url_s,url_m,url_z,url_l,url_o'));
         $xml = \simplexml_load_string($results);
 
         if (!$xml || count($xml->photos->photo) <= 0)
